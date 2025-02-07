@@ -1,0 +1,7 @@
+# ignore sensitive files 
+.env
+.air.toml
+.DS_Store
+
+# ignore temporary files
+tmp
