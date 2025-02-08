@@ -7,10 +7,11 @@ import (
 	"errors"
 	"log"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func GetUsers(ctx context.Context, limit, offset int) ([]models.UserResponse, error) {
-	// Set a timeout to avoid long DB queries
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
@@ -20,7 +21,6 @@ func GetUsers(ctx context.Context, limit, offset int) ([]models.UserResponse, er
 		return nil, errors.New("failed to retrieve users")
 	}
 
-	// Convert to response format to avoid exposing sensitive fields
 	var response []models.UserResponse
 	for _, user := range users {
 		response = append(response, models.UserResponse{
@@ -34,7 +34,6 @@ func GetUsers(ctx context.Context, limit, offset int) ([]models.UserResponse, er
 }
 
 func GetUsersPaginated(ctx context.Context, limit, offset int) ([]models.UserResponse, int, error) {
-	// Set a timeout to avoid long DB queries
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
@@ -44,7 +43,6 @@ func GetUsersPaginated(ctx context.Context, limit, offset int) ([]models.UserRes
 		return nil, 0, errors.New("failed to retrieve users")
 	}
 
-	// Convert to response format
 	var response []models.UserResponse
 	for _, user := range users {
 		response = append(response, models.UserResponse{
@@ -55,4 +53,51 @@ func GetUsersPaginated(ctx context.Context, limit, offset int) ([]models.UserRes
 	}
 
 	return response, totalCount, nil
+}
+
+func CreateUser(ctx context.Context, user *models.User) error {
+	if user.Name == "" || user.Email == "" {
+		return errors.New("name and email are required")
+	}
+
+	existingUser, err := repositories.GetUserByEmail(ctx, user.Email)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Printf("Error checking existing user: %v", err)
+		return errors.New("failed to check existing user")
+	}
+	if existingUser != nil {
+		return errors.New("email already exists")
+	}
+
+	if err := repositories.CreateUser(ctx, user); err != nil {
+		log.Printf("Error creating user: %v", err)
+		return errors.New("failed to create user")
+	}
+
+	return nil
+}
+
+func UpdateUser(ctx context.Context, id int, user *models.User) error {
+	if user.Name == "" || user.Email == "" {
+		return errors.New("name and email are required")
+	}
+	user.UpdatedAt = time.Now()
+
+	err := repositories.UpdateUser(ctx, id, user)
+	if err != nil {
+		log.Printf("Error updating user: %v", err)
+		return errors.New("failed to update user")
+	}
+
+	return nil
+}
+
+func DeleteUser(ctx context.Context, id int) error {
+	err := repositories.DeleteUser(ctx, id)
+	if err != nil {
+		log.Printf("Error deleting user: %v", err)
+		return errors.New("failed to delete user")
+	}
+
+	return nil
 }
