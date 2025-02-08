@@ -2,10 +2,11 @@ package main
 
 import (
 	"codebase-go-echo/config"
-	"codebase-go-echo/internal/handlers"
+	"codebase-go-echo/internal/routes"
 	"codebase-go-echo/pkg/databases/postgresql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -14,13 +15,13 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 	postgresql.ConnectDB(cfg.PostgreSqlDsn)
+	postgresql.SetMaxConnections(50, 25, time.Minute*30)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/", handlers.GetHealthCheck)
-	e.GET("/users", handlers.GetUsers)
+	routes.RegisterRoutes(e)
 
 	port := fmt.Sprintf(":%s", cfg.ServerPort)
 	log.Printf("Server running on %s", port)
