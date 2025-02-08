@@ -20,4 +20,5 @@ func RegisterRoutes(e *echo.Echo) {
 
 	userGroup := api.Group("/users")
 	userGroup.GET("/", handlers.GetUsers)
+	userGroup.GET("/paginate", handlers.GetUsersPaginated)
 }

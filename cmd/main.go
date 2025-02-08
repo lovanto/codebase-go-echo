@@ -17,6 +17,8 @@ func main() {
 	postgresql.ConnectDB(cfg.PostgreSqlDsn)
 	postgresql.SetMaxConnections(50, 25, time.Minute*30)
 
+	defer postgresql.CloseDB()
+
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

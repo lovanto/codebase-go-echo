@@ -53,22 +53,6 @@ func PingDB() error {
 	return sqlDB.Ping()
 }
 
-// WithTransaction executes a function within a database transaction
-func WithTransaction(txFunc func(tx *gorm.DB) error) error {
-	tx := DB.Begin()
-	if tx.Error != nil {
-		return tx.Error
-	}
-
-	err := txFunc(tx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	return tx.Commit().Error
-}
-
 // SetMaxConnections configures the database connection pool
 func SetMaxConnections(maxOpen, maxIdle int, maxLifetime time.Duration) {
 	sqlDB, err := DB.DB()

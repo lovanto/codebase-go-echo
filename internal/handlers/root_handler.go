@@ -10,7 +10,7 @@ import (
 
 func GetHealthCheck(c echo.Context) error {
 	err := postgresql.PingDB()
-	var response utils.Response
+	var response utils.ResponseStruct
 	if err != nil {
 		response = utils.ErrorResponse(http.StatusInternalServerError, "Database is not working, please check your database", nil)
 	} else {
