@@ -7,8 +7,10 @@ import (
 )
 
 type Config struct {
-	ServerPort    string
-	PostgreSqlDsn string
+	ServerPort        string
+	PostgreSqlDsn     string
+	BasicAuthUsername string
+	BasicAuthPassword string
 }
 
 func LoadConfig() *Config {
@@ -23,7 +25,9 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
-		ServerPort:    viper.GetString("SERVER_PORT"),
-		PostgreSqlDsn: viper.GetString("POSTGRESQL_DSN"),
+		ServerPort:        viper.GetString("SERVER_PORT"),
+		PostgreSqlDsn:     viper.GetString("POSTGRESQL_DSN"),
+		BasicAuthUsername: viper.GetString("BASIC_AUTH_USERNAME"),
+		BasicAuthPassword: viper.GetString("BASIC_AUTH_PASSWORD"),
 	}
 }
